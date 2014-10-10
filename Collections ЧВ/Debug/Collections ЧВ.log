@@ -1,4 +1,4 @@
-﻿Сборка начата 28.08.2014 18:00:17.
+﻿Сборка начата 10.10.2014 19:51:14.
      1>Проект "C:\Users\Anton\documents\visual studio 2013\Projects\Collections ЧВ\Collections ЧВ\Collections ЧВ.vcxproj" в узле 2 (целевые объекты Build).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
@@ -10,4 +10,4 @@
 
 Сборка успешно завершена.
 
-Затраченное время: 00:00:01.31
+Затраченное время: 00:00:01.27

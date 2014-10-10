@@ -1,18 +1,19 @@
 #include <iostream>
 #include <string>
+
 using namespace std;
 
-class Base
+class Collections
 {
 	
 };
 
 template <class T>
-class Array :virtual Base
+class Array :virtual Collections
 {
 protected:
 	T *a;	
-	int size=0,tSize;
+	int size = 0, ind = -1;
 public:
 	Array()
 	{
@@ -34,22 +35,19 @@ public:
 
 	void Add(T element)
 	{
-		T *tmpArr=a;
-		/*tmpArr = new T[size];
-		for (int i = 0; i < size; i++)
-			tmpArr[i] = a[i];*/
-		size += 1;
-		a = new T[size];
-		for (int i = 0; i < size - 1; i++)
-			a[i] = tmpArr[i];
-		a[size - 1] = element;
+		Insert(element, size);
 	}
 
 	void Insert(T element, int index)
 	{
 		if (index == size)
 		{
-			Add(element);
+			T *tmpArr = a;
+			size += 1;
+			a = new T[size];
+			for (int i = 0; i < size - 1; i++)
+				a[i] = tmpArr[i];
+			a[size - 1] = element;
 			return;
 		}
 		T *tmpArr;
@@ -68,9 +66,6 @@ public:
 		}
 		size += 1;
 		a = tmpArr;
-		/*a = new T[size];
-		for (int i = 0; i < size; i++)
-			a[i] = tmpArr[i];*/
 	}
 
 	void Show()
@@ -100,17 +95,14 @@ public:
 	void Remove(T element)
 	{
 		T *tmpArr=a;
-		/*tmpArr = new T[size];
-		for (int i = 0; i < size; i++)
-			tmpArr[i] = a[i];*/
 		a = new T[size];
 		int c = 0;
 		for (int i = 0; i < size; i++)
-		if (tmpArr[i] != element)
-		{
-			a[c] = tmpArr[i];
-			c++;
-		}
+			if (tmpArr[i] != element)
+			{
+				a[c] = tmpArr[i];
+				c++;
+			}
 		size = c;
 	}
 
@@ -150,6 +142,7 @@ public:
 	{
 		RemoveLast(element);
 	}
+
 
 	Array<T> operator+(T element)
 	{
@@ -232,6 +225,16 @@ public:
 		t->size = c;
 		return *t;
 	}
+
+	friend	ostream& operator<<(ostream& out, Array<T> arr)
+	{
+		cout << "\n[";
+		for (int i = 0; i < arr.size-1; i++)
+			out << arr.a[i] << ", ";
+		out << arr.a[arr.size - 1];
+		cout <<"]\n";
+		return out;
+	}
 };
 
 template <class TKey, class TValue>
@@ -239,12 +242,24 @@ struct DictItem
 {
 	TKey k;
 	TValue v;
-	/*DictItem(TKey key, TValue value)
+
+	friend ostream& operator<<(ostream& out, DictItem DI)
 	{
-		k = key;
-		v = value;
-	}*/
+		out << "{\"" << DI.k << "\":\"" << DI.v << "\"}";
+		return out;
+	}
+	
+	void operator+(DictItem DI)
+	{
+		Array::Add(DI);
+	}
 };
+
+template <class T, class TKey, class TValue>
+bool operator!=(T t, DictItem<TKey, TValue> DI)
+{
+	return (DI.k != t) ? true : false;
+}
 
 template <class TKey, class TValue>
 class Dictionary:public Array<DictItem<TKey, TValue> >
@@ -253,13 +268,131 @@ public:
 	void Add(TKey key, TValue value)
 	{
 		DictItem<TKey, TValue> DI = { key, value };
-		//Add(DI);
-		
+		Array::Add(DI);
 	}
 
-	
+	TValue& operator[](TKey key)
+	{
+		for (int i = 0; i < size; i++)
+			if (a[i].k == key)
+				return a[i].v;
+	}
+
+	/*void operator+(DictItem<TKey, TValue> DI)
+	{
+		Array::Add(DI);
+	}*/
+
+	void Remove(TKey key)
+	{
+		DictItem<TKey, TValue> DI = { key, operator[](key) };
+		Array::Remove(DI);
+	}
+
+	void operator+=(DictItem<TKey, TValue> DI)
+	{
+		Array::Add(DI);
+	}
+
+	bool KeyExists(TKey key)
+	{
+		for (int i = 0; i < size; i++)
+			if (a[i].k == key)
+				return true;
+			return false;
+	}
+
+	bool ValueExists(TValue value)
+	{
+		for (int i = 0; i < size; i++)
+			if (a[i].v == value)
+				return true;
+		return false;
+	}
+
+	/*void operator+(TKey key, TValue value)
+	{
+		DictItem<TKey, TValue> DI = { key, value };
+		Array::operator+(DI);
+	}*/
 };
 
+template <class T>
+struct ListItem
+{
+	T n;
+	ListItem<T>* next=NULL;
+};
+
+template <class T>
+class List : virtual Collections
+{
+private:
+	ListItem<T>* beg=new ListItem<T>;;
+public:
+	int count = 0;
+
+	List()
+	{
+		beg = NULL;
+	}
+
+	~List()
+	{
+		while (beg != NULL)
+		{
+			ListItem<T>* t = beg->next;
+			delete beg;
+			beg = t;
+		}
+	}
+
+	void Add(T element)
+	{
+		ListItem<T> *t = new ListItem<T>;
+		if (beg == NULL)
+		{
+			t->n = element;
+			t->next = beg;
+			beg = t;
+			count++;
+		}
+		else
+		{
+			ListItem<T> *p = beg;
+			t->n = element;
+			t->next = NULL;
+			p->next = t;
+			p = p->next;
+			count++;
+		}
+	}
+	
+	void AddToBegin(T element)
+	{
+		ListItem<T> *t = new ListItem<T>;
+		t->n = element;
+		t->next = beg;
+		beg = t;
+		count++;
+	}
+
+	friend ostream& operator<<(ostream& out, List<T> list)
+	{
+		ListItem<T> *l = list.beg;
+		out << "\n[";
+		while (l != NULL)
+		{
+			if (l->next==NULL)
+				out << l->n;
+			else
+				out << l->n << ", ";
+			l = l->next;
+		}
+		out << "]\n";
+		return out;
+	}
+};
 
 void main()
 {
@@ -270,6 +403,7 @@ void main()
 	arrInt1 += 22;
 	arrInt1.Add(53);
 	arrInt1.Insert(7, 2);
+	cout << arrInt1;
 	arrInt1.Show();
 	cout << endl << arrInt1.IndexOf(4) << endl;
 	cout << arrInt1.LastIndexOf(100) << endl;
@@ -282,9 +416,9 @@ void main()
 	arrInt2=arrInt1+33;
 	arrInt2.Show();
 	arrInt3 = arrInt1 + arrInt2;
-	arrInt3.Show();
+	arrInt3.Show();*/
 	
-	Array<string> arrStr1, arrStr2, arrStr3;
+	/*Array<string> arrStr1, arrStr2, arrStr3;
 	cout << "\nSTR:\n";
 	arrStr1.Add("asd");
 	arrStr1 += "qwer";
@@ -307,16 +441,28 @@ void main()
 	arrStr3.Show();*/
 
 
-	/*Dictionary <string, int> dic;
-	dic.Add("OOO", 14);
-	/*dic.Add("asdf", 7);
+	/*Dictionary <string, int> dic, dic2, dic3;
+	DictItem <string, int> di;
+	
+	dic.Add("mwsd", 14);
+	dic.Add("asdf", 7);
 	dic.Add("OOO", 10);
 	dic.Add("qwer", 14);
-	dic.Show();
-	dic.Remove("qwer");
+	
+	cout << dic;
+	cout << dic["OOO"];
+	dic.Remove("OOO");
+	
 	cout << "\nAFTER REMOVE:\n";
-	dic.Show();
-	if (dic.KeyExists("OOO"))
+	cout << dic;
+	
+	di.k = "uuuuuuu";
+	di.v = 321;
+	dic += di;
+	//dic2 = dic;
+	cout << dic;*/
+
+	/*if (dic.KeyExists("OOO"))
 		cout << "\nKey is exist.\n";
 	else
 		cout << "\nNo keys :(\n";
@@ -324,6 +470,26 @@ void main()
 		cout << "\nValue is exist.\n";
 	else
 		cout << "\nNo values :(\n";*/
+
+
+		/*int var = 123; // инициализация переменной var числом 123
+		int *ptrvar = &var; // указатель на переменную var (присвоили адрес переменной указателю)
+		cout << "&var    = " << &var << endl;// адрес переменной var содержащийся в памяти, извлечённый операцией взятия адреса
+		cout << "ptrvar  = " << ptrvar << endl;// адрес переменной var, является значением указателя ptrvar
+		cout << "var     = " << var << endl; // значение в переменной var
+		cout << "*ptrvar = " << *ptrvar << endl; // вывод значения содержащегося в переменной var через указатель, операцией разименования указателя
+		system("pause");*/
+
+	List<int> list;
+	/*list.AddToBegin(177);
+	list.AddToBegin(33);
+	list.AddToBegin(9);*/
+	list.Add(177);
+	list.Add(33);
+	list.Add(9);
+
+
+	cout << list;
 
 	cout << endl;
 	system("pause");
