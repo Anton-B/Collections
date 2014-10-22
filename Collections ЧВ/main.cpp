@@ -320,15 +320,20 @@ public:
 template <class T>
 struct ListItem
 {
-	T n;
-	ListItem<T>* next=NULL;
+	T value;
+	ListItem<T>* next;
+	ListItem(T v)
+	{
+		next = NULL;
+		value = v;
+	}
 };
 
 template <class T>
 class List : virtual Collections
 {
 private:
-	ListItem<T>* beg=new ListItem<T>;;
+	ListItem<T>* beg;
 public:
 	int count = 0;
 
@@ -347,34 +352,16 @@ public:
 		}
 	}
 
-	void Add(T element)
+	ListItem<T>* getLast()
 	{
-		ListItem<T> *t = new ListItem<T>;
 		if (beg == NULL)
+			return NULL;
+		ListItem<T> *p = beg;
+		while (p->next != NULL)
 		{
-			t->n = element;
-			t->next = beg;
-			beg = t;
-			count++;
-		}
-		else
-		{
-			ListItem<T> *p = beg;
-			t->n = element;
-			t->next = NULL;
-			p->next = t;
 			p = p->next;
-			count++;
 		}
-	}
-	
-	void AddToBegin(T element)
-	{
-		ListItem<T> *t = new ListItem<T>;
-		t->n = element;
-		t->next = beg;
-		beg = t;
-		count++;
+		return p;
 	}
 
 	friend ostream& operator<<(ostream& out, List<T> list)
@@ -383,15 +370,48 @@ public:
 		out << "\n[";
 		while (l != NULL)
 		{
-			if (l->next==NULL)
-				out << l->n;
+			if (l->next == NULL)
+				out << l->value;
 			else
-				out << l->n << ", ";
+				out << l->value << ", ";
 			l = l->next;
 		}
 		out << "]\n";
 		return out;
 	}
+
+	ListItem<T> Add(T element)
+	{
+		if (beg != NULL)
+		{
+			ListItem<T> *t = new ListItem<T>(element);
+			this->getLast()->next = t;
+			return t;
+		}
+		else
+			AddToBegin(element);
+	}
+	
+	ListItem<T> AddToBegin(T element)
+	{
+		ListItem<T> *t = new ListItem<T>(element);
+		t->value = element;
+		t->next = beg;
+		beg = t;
+		count++;
+		return t;
+	}
+
+	void AddAfter(ListItem<T>* item, T new_element)
+	{
+		ListItem<T> *t = new ListItem<T>(new_element);
+		
+	}
+
+	/*void Delete(T element)
+	{
+		
+	}*/
 };
 
 void main()
@@ -487,7 +507,9 @@ void main()
 	list.Add(177);
 	list.Add(33);
 	list.Add(9);
-
+	ListItem<int>* node = list.Add(400);
+	list.AddAfter(node, 421);
+	//list.Delete(33);
 
 	cout << list;
 
