@@ -380,7 +380,7 @@ public:
 		return out;
 	}
 
-	ListItem<T> Add(T element)
+	ListItem<T>* Add(T element)
 	{
 		if (beg != NULL)
 		{
@@ -392,7 +392,7 @@ public:
 			AddToBegin(element);
 	}
 	
-	ListItem<T> AddToBegin(T element)
+	ListItem<T>* AddToBegin(T element)
 	{
 		ListItem<T> *t = new ListItem<T>(element);
 		t->value = element;
@@ -405,13 +405,25 @@ public:
 	void AddAfter(ListItem<T>* item, T new_element)
 	{
 		ListItem<T> *t = new ListItem<T>(new_element);
-		
+		t->next = item->next;
+		item->next = t;
 	}
 
-	/*void Delete(T element)
+	void Delete(ListItem<T>* item)
 	{
-		
-	}*/
+		ListItem<T> *t = beg;
+		while (t->next != item)
+			t = t->next;
+		t->next = item->next;
+	}
+
+	ListItem<T>* Search(ListItem<T>* item)
+	{
+		ListItem<T> *t = beg;
+		while (t != NULL&&t != item)
+			t = t->next;
+		return (t == item) ? t : NULL;
+	}
 };
 
 void main()
@@ -505,11 +517,12 @@ void main()
 	list.AddToBegin(33);
 	list.AddToBegin(9);*/
 	list.Add(177);
-	list.Add(33);
-	list.Add(9);
-	ListItem<int>* node = list.Add(400);
-	list.AddAfter(node, 421);
-	//list.Delete(33);
+	ListItem<int>* node1 = list.Add(33);
+	ListItem<int>* node2 = list.Add(9);
+	ListItem<int>* node3 = list.Add(400);
+	list.AddAfter(node3, 421);
+	list.Delete(node2);
+	list.Search(node1);
 
 	cout << list;
 
