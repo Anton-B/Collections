@@ -1,20 +1,29 @@
 #include <iostream>
 #include <string>
-
 using namespace std;
 
+template <class T>
 class Collections
 {
-	
+	virtual void Add(T element) = 0;
+	virtual void Insert(T element, int index) = 0;
+	virtual int IndexOf(T element) = 0;
+	virtual int LastIndexOf(T element) = 0;
+	virtual void Remove(T element) = 0;
+	virtual void RemoveLast(T element) = 0;
+	virtual void AddAfter(T item, T new_element) = 0;
+	virtual void AddToBegin(T element) = 0;
+	virtual void Delete(T item) = 0;
 };
 
 template <class T>
-class Array :virtual Collections
+class Array :virtual Collections<T>
 {
 protected:
-	T *a;	
+	T *a;
 	int size = 0, ind = -1;
 public:
+
 	Array()
 	{
 		a = new T[size];
@@ -28,10 +37,9 @@ public:
 			a[i] = val.a[i];
 	}
 
-	~Array()
-	{
-		//delete [] a;
-	}
+	void AddAfter(T item, T new_element){}
+	void AddToBegin(T element){}
+	void Delete(T item){}
 
 	void Add(T element)
 	{
@@ -66,14 +74,6 @@ public:
 		}
 		size += 1;
 		a = tmpArr;
-	}
-
-	void Show()
-	{
-		cout << "\nArray:\n";
-		//cout << "size: " << size << endl;
-		for (int i = 0; i < size; i++)
-			cout << a[i] << endl;
 	}
 
 	int IndexOf(T element)
@@ -143,7 +143,6 @@ public:
 		RemoveLast(element);
 	}
 
-
 	Array<T> operator+(T element)
 	{
 		Array<T> *t;
@@ -156,7 +155,7 @@ public:
 		return *t;
 	}
 
-	Array<T> operator+(Array<T> arr)
+	Array<T> operator+(Array<T> &arr)
 	{
 		Array<T> *t;
 		t = new Array<T>;
@@ -243,53 +242,40 @@ struct DictItem
 	TKey k;
 	TValue v;
 
-	friend ostream& operator<<(ostream& out, DictItem DI)
+	friend ostream& operator<<(ostream& out, DictItem* DI)
 	{
-		out << "{\"" << DI.k << "\":\"" << DI.v << "\"}";
+		out << "{\"" << DI->k << "\":\"" << DI->v << "\"}";
 		return out;
-	}
-	
-	void operator+(DictItem DI)
-	{
-		Array::Add(DI);
 	}
 };
 
-template <class T, class TKey, class TValue>
-bool operator!=(T t, DictItem<TKey, TValue> DI)
-{
-	return (DI.k != t) ? true : false;
-}
-
 template <class TKey, class TValue>
-class Dictionary:public Array<DictItem<TKey, TValue> >
+class Dictionary :public Array<DictItem<TKey, TValue>* >
 {
 public:
 	void Add(TKey key, TValue value)
 	{
-		DictItem<TKey, TValue> DI = { key, value };
+		DictItem<TKey, TValue>* DI = new DictItem<TKey, TValue>;
+		DI->k = key;
+		DI->v = value;
 		Array::Add(DI);
 	}
-
+	
 	TValue& operator[](TKey key)
 	{
 		for (int i = 0; i < size; i++)
-			if (a[i].k == key)
-				return a[i].v;
+			if (a[i]->k == key)
+				return a[i]->v;
 	}
-
-	/*void operator+(DictItem<TKey, TValue> DI)
-	{
-		Array::Add(DI);
-	}*/
 
 	void Remove(TKey key)
 	{
-		DictItem<TKey, TValue> DI = { key, operator[](key) };
-		Array::Remove(DI);
+		for (int i = 0; i < size; i++)
+			if (a[i]->k == key)
+				Array::Remove(a[i]);
 	}
 
-	void operator+=(DictItem<TKey, TValue> DI)
+	void operator+=(DictItem<TKey, TValue>* DI)
 	{
 		Array::Add(DI);
 	}
@@ -297,7 +283,7 @@ public:
 	bool KeyExists(TKey key)
 	{
 		for (int i = 0; i < size; i++)
-			if (a[i].k == key)
+			if (a[i]->k == key)
 				return true;
 			return false;
 	}
@@ -305,16 +291,11 @@ public:
 	bool ValueExists(TValue value)
 	{
 		for (int i = 0; i < size; i++)
-			if (a[i].v == value)
+			if (a[i]->v == value)
 				return true;
 		return false;
 	}
 
-	/*void operator+(TKey key, TValue value)
-	{
-		DictItem<TKey, TValue> DI = { key, value };
-		Array::operator+(DI);
-	}*/
 };
 
 template <class T>
@@ -322,6 +303,8 @@ struct ListItem
 {
 	T value;
 	ListItem<T>* next;
+	
+
 	ListItem(T v)
 	{
 		next = NULL;
@@ -330,7 +313,7 @@ struct ListItem
 };
 
 template <class T>
-class List : virtual Collections
+class List : virtual Collections<T>
 {
 private:
 	ListItem<T>* beg;
@@ -352,15 +335,19 @@ public:
 		}
 	}
 
+	void Insert(T element, int index){}
+	int IndexOf(T element){ return 0; }
+	int LastIndexOf(T element){ return 0; }
+	void Remove(T element){}
+	void RemoveLast(T element){}
+
 	ListItem<T>* getLast()
 	{
 		if (beg == NULL)
 			return NULL;
 		ListItem<T> *p = beg;
 		while (p->next != NULL)
-		{
 			p = p->next;
-		}
 		return p;
 	}
 
@@ -379,42 +366,51 @@ public:
 		out << "]\n";
 		return out;
 	}
-
-	ListItem<T>* Add(T element)
+	
+	void Add(T element)
 	{
 		if (beg != NULL)
 		{
 			ListItem<T> *t = new ListItem<T>(element);
 			this->getLast()->next = t;
-			return t;
 		}
 		else
 			AddToBegin(element);
 	}
 	
-	ListItem<T>* AddToBegin(T element)
+	void AddToBegin(T element)
 	{
 		ListItem<T> *t = new ListItem<T>(element);
 		t->value = element;
 		t->next = beg;
 		beg = t;
 		count++;
-		return t;
+		
 	}
 
-	void AddAfter(ListItem<T>* item, T new_element)
+	void AddAfter(T item, T new_element)
 	{
 		ListItem<T> *t = new ListItem<T>(new_element);
-		t->next = item->next;
-		item->next = t;
+		ListItem<T> *b = beg;
+		while (b && b->value != item)
+			b = b->next;
+		if (b && b->value == item)
+		{
+			t->next = b->next;
+			b->next = t;
+		}	
 	}
 
-	void Delete(ListItem<T>* item)
+	void Delete(T item)
 	{
-		ListItem<T> *t = beg;
-		while (t->next != item)
-			t = t->next;
-		t->next = item->next;
+		ListItem<T> *b = new ListItem<T>(NULL);
+		b->next = beg;
+		while (b->next && b->next->value != item)
+			b = b->next;
+		if (b->value)
+			b->next = b->next->next;
+		else
+			beg = b->next->next;
 	}
 
 	ListItem<T>* Search(ListItem<T>* item)
@@ -428,7 +424,7 @@ public:
 
 void main()
 {
-	/*Array<int> arrInt1,arrInt2,arrInt3;
+	Array<int> arrInt1,arrInt2,arrInt3;
 	cout << "\nINT:\n";
 	arrInt1.Add(6);
 	arrInt1.Add(100);
@@ -436,21 +432,21 @@ void main()
 	arrInt1.Add(53);
 	arrInt1.Insert(7, 2);
 	cout << arrInt1;
-	arrInt1.Show();
+	cout << arrInt1;
 	cout << endl << arrInt1.IndexOf(4) << endl;
 	cout << arrInt1.LastIndexOf(100) << endl;
 	arrInt1.Remove(22);
 	arrInt1 -= 6;
 	cout << "\nAFTER REMOVE:\n";
-	arrInt1.Show();
+	cout<<arrInt1;
 	cout << "\narrInt[index]: " << arrInt1[2] << endl;
 	cout << "\nINT 2:\n";
 	arrInt2=arrInt1+33;
-	arrInt2.Show();
+	cout<<arrInt2;
 	arrInt3 = arrInt1 + arrInt2;
-	arrInt3.Show();*/
+	cout << arrInt3;
 	
-	/*Array<string> arrStr1, arrStr2, arrStr3;
+	Array<string> arrStr1, arrStr2, arrStr3;
 	cout << "\nSTR:\n";
 	arrStr1.Add("asd");
 	arrStr1 += "qwer";
@@ -459,22 +455,22 @@ void main()
 	arrStr1.Add("asd");
 	arrStr1.Add("rg");
 	arrStr1.Insert("-!!-", 4);
-	arrStr1.Show();
+	cout<<arrStr1;
 	cout << endl << arrStr1.IndexOf("asd") << endl;
 	cout << arrStr1.LastIndexOf("t") << endl;
 	arrStr1 -= "asd";
 	arrStr1.Remove("zxcfdh");
 	cout << "\nAFTER REMOVE:\n";
-	arrStr1.Show();
+	cout<<arrStr1;
 	arrStr2 = arrStr1 - "asd";
 	arrStr2.RemoveLast("-!!-");
-	arrStr2.Show();
+	cout << arrStr2;
 	arrStr3 = arrStr1 - arrStr2;
-	arrStr3.Show();*/
+	cout << arrStr3;
 
 
-	/*Dictionary <string, int> dic, dic2, dic3;
-	DictItem <string, int> di;
+	Dictionary<string, int> dic, dic2, dic3;
+	DictItem<string, int>* di = new DictItem<string, int>;
 	
 	dic.Add("mwsd", 14);
 	dic.Add("asdf", 7);
@@ -488,40 +484,38 @@ void main()
 	cout << "\nAFTER REMOVE:\n";
 	cout << dic;
 	
-	di.k = "uuuuuuu";
-	di.v = 321;
+	di->k = "uuuuuuu";
+	di->v = 321;
 	dic += di;
-	//dic2 = dic;
-	cout << dic;*/
+	dic2.Add("q", 1);
+	dic2.Add("w", 2);
+	dic2.Add("e", 3);
+	dic2.Add("r", 4);
+	di->k = "z";
+	di->v = 9;
+	//dic3 = dic + dic2;
+	cout << dic;
 
-	/*if (dic.KeyExists("OOO"))
+	if (dic.KeyExists("uuuuuuu"))
 		cout << "\nKey is exist.\n";
 	else
 		cout << "\nNo keys :(\n";
 	if (dic.ValueExists(435))
 		cout << "\nValue is exist.\n";
 	else
-		cout << "\nNo values :(\n";*/
-
-
-		/*int var = 123; // инициализация переменной var числом 123
-		int *ptrvar = &var; // указатель на переменную var (присвоили адрес переменной указателю)
-		cout << "&var    = " << &var << endl;// адрес переменной var содержащийся в памяти, извлечённый операцией взятия адреса
-		cout << "ptrvar  = " << ptrvar << endl;// адрес переменной var, является значением указателя ptrvar
-		cout << "var     = " << var << endl; // значение в переменной var
-		cout << "*ptrvar = " << *ptrvar << endl; // вывод значения содержащегося в переменной var через указатель, операцией разименования указателя
-		system("pause");*/
+		cout << "\nNo values :(\n";
 
 	List<int> list;
-	/*list.AddToBegin(177);
-	list.AddToBegin(33);
-	list.AddToBegin(9);*/
-	list.Add(177);
-	ListItem<int>* node1 = list.Add(33);
-	ListItem<int>* node2 = list.Add(9);
-	ListItem<int>* node3 = list.Add(400);
-	list.AddAfter(node3, 421);
-	list.Delete(node2);
+	ListItem<int>* node = new ListItem<int>(177);
+	ListItem<int>* node1 = new ListItem<int>(33);
+	ListItem<int>* node2 = new ListItem<int>(9);
+	ListItem<int>* node3 = new ListItem<int>(400);
+	list.Add(33);
+	list.AddToBegin(177);
+	list.Add(9);
+	list.Add(400);
+	list.AddAfter(9, 421);
+	list.Delete(9);
 	list.Search(node1);
 
 	cout << list;
