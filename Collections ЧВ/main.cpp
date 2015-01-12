@@ -29,7 +29,7 @@ void main()
 	arrInt3 = arrInt1 + arrInt2;
 	cout << arrInt3;
 	
-	Array<string> arrStr1, arrStr2, arrStr3;
+	Array<string> arrStr1, arrStr2, arrStr3, arrStr4;
 	cout << "\nSTR:\n";
 	arrStr1.Add("asd");
 	arrStr1 += "qwer";
@@ -50,6 +50,16 @@ void main()
 	cout << arrStr2;
 	arrStr3 = arrStr1 - arrStr2;
 	cout << arrStr3;
+
+	arrStr4.Add("11");
+	arrStr4.Add("14");
+	arrStr4.Add("13");
+	arrStr4.Add("14");
+	arrStr4.Add("15");
+	cout << arrStr4;
+	arrStr4.RemoveByIndex(4);
+	arrStr4.Remove("14");
+	cout << arrStr4;
 
 	Dictionary<string, int> dic, dic2, dic3;
 	DictItem<string, int>* di = new DictItem<string, int>;

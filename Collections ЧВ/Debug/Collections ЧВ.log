@@ -1,3 +1,3 @@
 ﻿  main.cpp
-c:\users\anton\documents\visual studio 2013\projects\collections чв\collections чв\dictionary.h(37): warning C4715: 'Dictionary<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,int>::operator[]' : not all control paths return a value
+c:\users\anton\documents\visual studio 2013\projects\collections чв\collections чв\dictionary.h(40): warning C4715: 'Dictionary<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,int>::operator[]' : not all control paths return a value
   Collections ЧВ.vcxproj -> C:\Users\Anton\documents\visual studio 2013\Projects\Collections ЧВ\Debug\Collections ЧВ.exe

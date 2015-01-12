@@ -3,6 +3,9 @@
 #include "collections.h"
 using namespace std;
 
+#ifndef LIST_HEADER_FILE
+#define LIST_HEADER_FILE
+
 template <class T>
 struct ListItem
 {
@@ -82,7 +85,7 @@ public:
 		beg = t;
 	}
 
-	void Insert(const int &index, const T &element)
+	void Insert(const int index, const T &element)
 	{
 		ListItem<T> *t = new ListItem<T>(element), *b = beg;
 		int c = 1;
@@ -134,3 +137,5 @@ public:
 		return false;
 	}
 };
+
+#endif
